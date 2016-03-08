@@ -7,8 +7,13 @@
 //
 
 #import <XCTest/XCTest.h>
+#import "DDTodoListViewModel.h"
+#import "DDTodoItem.h"
 
 @interface DDTodoListTests : XCTestCase
+
+@property (nonatomic, strong) DDTodoListViewModel* viewModel;
+@property (nonatomic, strong) UITableView* tableView;
 
 @end
 
@@ -16,23 +21,45 @@
 
 - (void)setUp {
     [super setUp];
-    // Put setup code here. This method is called before the invocation of each test method in the class.
+    self.viewModel = [DDTodoListViewModel new];
+    self.tableView = [UITableView new];
 }
 
 - (void)tearDown {
     // Put teardown code here. This method is called after the invocation of each test method in the class.
     [super tearDown];
+    self.viewModel = nil;
+    self.tableView = nil;
 }
 
-- (void)testExample {
-    // This is an example of a functional test case.
-    // Use XCTAssert and related functions to verify your tests produce the correct results.
+- (void)testAddToViewModel {
+    NSInteger initialCount = [self.viewModel tableView:self.tableView numberOfRowsInSection:0];
+    [self.viewModel addItem:[[DDTodoItem alloc] initWithTitle:@"Hello"]];
+    
+    NSInteger newCount = [self.viewModel tableView:self.tableView numberOfRowsInSection:0];
+    NSInteger expectedCount = initialCount+1;
+    
+    XCTAssert(newCount == expectedCount, @"Adding to view model failed, expected %@, got %@", @(expectedCount), @(newCount));
 }
 
-- (void)testPerformanceExample {
+-(void)testDeleteFromViewModel {
+    NSInteger initialCount = [self.viewModel tableView:self.tableView numberOfRowsInSection:0];
+    [self.viewModel removeItemAtIndex:initialCount-1];
+    
+    NSInteger newCount = [self.viewModel tableView:self.tableView numberOfRowsInSection:0];
+    NSInteger expectedCount = initialCount-1;
+    
+    XCTAssert(newCount == expectedCount, @"Removing from view model failed, expected %@, got %@", @(expectedCount), @(newCount));
+}
+
+- (void)testViewModelInsertionPerformance {
     // This is an example of a performance test case.
     [self measureBlock:^{
-        // Put the code you want to measure the time of here.
+        for (int i = 0; i < 1000; i++) {
+            NSString *title = [NSString stringWithFormat:@"%d", i];
+            DDTodoItem *item = [[DDTodoItem alloc] initWithTitle:title];
+            [self.viewModel addItem:item];
+        }
     }];
 }
 
